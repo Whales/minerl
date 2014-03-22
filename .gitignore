@@ -1,0 +1,10 @@
+minerl
+*.exe
+gmon.out
+cussed
+cusstest
+obj/
+objwin/
+*.swp
+*.txt
+*.prof
