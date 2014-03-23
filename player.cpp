@@ -4,20 +4,21 @@ Player::Player()
 {
   posy = 12;
   posx = 60;
-  backpack_size = 15;
-  stamina_max = 500;
-  stamina = 500;
 
-  pickaxe_level   = 1;
-  sword_level     = 1;
-  crossbow_level  = 1;
-  lamp_level      = 2;
+  cash = 500;
 
-  for (int i = 0; i < E_max; i++) {
-    equipment[i] = 0;
+  equipment[E_stamina]  = Equipment_status(500, 200,  50, 50);
+  equipment[E_backpack] = Equipment_status( 15, 100,  50,  3);
+  equipment[E_pickaxe]  = Equipment_status(  1, 100,  50,  1);
+  equipment[E_sword]    = Equipment_status(  1, 100,  50,  1);
+  equipment[E_crossbow] = Equipment_status(  1, 100,  50,  1);
+  equipment[E_lamp]     = Equipment_status(  2, 300, 100,  1);
+  
+  for (int i = 0; i < S_max; i++) {
+    supplies[i] = 0;
   }
-  equipment[E_ladders]  = 20;
-  equipment[E_supports] = 5;
+  supplies[S_ladders]  = 20;
+  supplies[S_supports] = 5;
 }
 
 Player::~Player()
@@ -26,32 +27,32 @@ Player::~Player()
 
 void Player::update_hud(cuss::interface &i_hud)
 {
-  i_hud.set_data("num_stamina",     stamina);
-  i_hud.set_data("num_stamina_max", stamina_max);
+  i_hud.set_data("num_stamina",     equipment[E_stamina].current);
+  i_hud.set_data("num_stamina_max", equipment[E_stamina].level);
   i_hud.set_data("num_storage",     get_storage());
-  i_hud.set_data("num_ladders",     equipment[E_ladders]);
-  i_hud.set_data("num_rope",        equipment[E_rope]);
-  i_hud.set_data("num_supports",    equipment[E_supports]);
+  i_hud.set_data("num_ladders",     supplies[S_ladders]);
+  i_hud.set_data("num_rope",        supplies[S_rope]);
+  i_hud.set_data("num_supports",    supplies[S_supports]);
 }
 
 int Player::get_storage()
 {
-  return backpack_size - findings.size();
+  return equipment[E_backpack].level - findings.size();
 }
 
 int Player::get_dig_power()
 {
-  return pickaxe_level;
+  return equipment[E_pickaxe].level;
 }
 
 int Player::get_lamp_radius()
 {
-  return lamp_level;
+  return equipment[E_lamp].level;
 }
 
 void Player::reset_values()
 {
-  stamina = stamina_max;
+  equipment[E_stamina].reset();
 }
 
 bool Player::move(Map* map, int movex, int movey)
@@ -122,8 +123,8 @@ bool Player::fall_if_needed(Map* map)
 
 bool Player::use_stamina(int amount)
 {
-  if (stamina >= amount) {
-    stamina -= amount;
+  if (equipment[E_stamina].current >= amount) {
+    equipment[E_stamina].current -= amount;
     return true;
   }
   return false;
