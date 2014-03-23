@@ -3,15 +3,19 @@
 #include "map.h"
 #include "player.h"
 
+void sell_findings(Player &pl);
+
 void shop_upgrades(Player &pl);
-void shop_supplies(Player &pl);
 void update_upgrade_ui(cuss::interface &i_shop, Player &pl);
+
+void shop_supplies(Player &pl);
+void update_supply_ui(cuss::interface &i_shop, Player &pl);
 
 int main()
 {
   init_display();
 
-  init_tiles();
+  init_data();
 
   Map map;
   map.generate();
@@ -58,6 +62,7 @@ int main()
 
     if (ch == 'a') {
       if (player.posx == 65 && player.posy == 12) {
+        sell_findings(player);
         shop_upgrades(player);
       }
     }
@@ -88,6 +93,14 @@ int main()
 
   end_display();
   return 0;
+}
+
+void sell_findings(Player &pl)
+{
+  for (int i = 0; i < pl.findings.size(); i++) {
+    pl.cash += TILES[pl.findings[i]].value;
+  }
+  pl.findings.clear();
 }
 
 void shop_upgrades(Player &pl)
@@ -167,4 +180,62 @@ void update_upgrade_ui(cuss::interface &i_shop, Player &pl)
 
 void shop_supplies(Player &pl)
 {
+  Window w_shop(0, 0, 80, 24);
+  cuss::interface i_shop;
+  i_shop.load_from_file("cuss/i_supplies.cuss");
+
+  update_supply_ui(i_shop, pl);
+
+  while (true) {
+    i_shop.draw(&w_shop);
+    w_shop.refresh();
+    long ch = input();
+
+    if ((ch == 'a' || ch == 'A') && pl.cash >= COST[S_ladders]) {
+      pl.cash -= COST[S_ladders];
+      pl.supplies[S_ladders] += AMT[S_ladders];
+      update_supply_ui(i_shop, pl);
+    }
+
+    if ((ch == 'b' || ch == 'B') && pl.cash >= COST[S_rope]) {
+      pl.cash -= COST[S_rope];
+      pl.supplies[S_rope] += AMT[S_rope];
+      update_supply_ui(i_shop, pl);
+    }
+
+    if ((ch == 'c' || ch == 'C') && pl.cash >= COST[S_supports]) {
+      pl.cash -= COST[S_supports];
+      pl.supplies[S_supports] += AMT[S_supports];
+      update_supply_ui(i_shop, pl);
+    }
+
+    if (ch == 'q' || ch == 'Q') {
+      return;
+    }
+
+    if (ch == 'u' || ch == 'U') {
+      shop_upgrades(pl);
+      return;
+    }
+  }
+}
+
+void update_supply_ui(cuss::interface &i_shop, Player &pl)
+{
+  i_shop.set_data("num_cash", pl.cash);
+
+  i_shop.set_data("num_ladders",  pl.supplies[S_ladders] );
+  i_shop.set_data("num_rope",     pl.supplies[S_rope]    );
+  i_shop.set_data("num_supports", pl.supplies[S_supports]);
+
+  i_shop.set_data("num_post_ladders",
+                  pl.supplies[S_ladders]  + AMT[S_ladders] );
+  i_shop.set_data("num_post_rope",
+                  pl.supplies[S_rope]     + AMT[S_rope]    );
+  i_shop.set_data("num_post_supports",
+                  pl.supplies[S_supports] + AMT[S_supports]);
+
+  i_shop.set_data("num_cost_ladders",  COST[S_ladders] );
+  i_shop.set_data("num_cost_rope",     COST[S_rope]    );
+  i_shop.set_data("num_cost_supports", COST[S_supports]);
 }

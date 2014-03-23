@@ -42,7 +42,7 @@ bool Tile::dig(int amount)
     return true;
   }
 // Set symbol to indicate remaining HP; TODO: No?
-  if (!data->valuable) {
+  if (!data->valuable()) {
     if (hp >= 10) {
       sym.symbol = 'A' + (hp - 10);
     } else {

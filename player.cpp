@@ -69,10 +69,11 @@ bool Player::move(Map* map, int movex, int movey)
   if (data->blocks) {
     if (data->dig > 0) {
       Tile* tile = map->get_tile(movex, movey);
+      Tile_id finding_id = tile->id;
       if (use_stamina(1)) {
         if (tile->dig( get_dig_power() )) {
-          if (data->valuable) {
-            add_finding(tile->id);
+          if (data->valuable()) {
+            add_finding(finding_id);
           }
           int bouldery = movey - 1;
           while (map->get_tile_id(movex, bouldery) == T_boulder) {
