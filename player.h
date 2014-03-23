@@ -22,19 +22,38 @@ public:
   ~Player();
 
   void update_hud(cuss::interface &i_hud);
-  int get_storage();
 
-  void move(Map* map, int movex, int movey);
+  int get_storage();
+  int get_dig_power();
+  int get_lamp_radius();
+
+  void reset_values();
+// Returns true if we actually used our turn
+  bool move(Map* map, int movex, int movey);
+// Returns true if we fell
+  bool fall_if_needed(Map* map);
+// Returns true if we had enough
+  bool use_stamina(int amount);
+  void add_finding(Tile_id id);
 
   int posx, posy;
   int stamina;
-  std::vector<Tile_id> findings;
 
 // "Permanent" values
+// Stats
   int stamina_max;
-  int backpack_size;
 
+// Equipment
+  int backpack_size;
+  int pickaxe_level;
+  int sword_level;
+  int crossbow_level;
+  int lamp_level;
+
+// Carried equipment
   int equipment[E_max];
+// Carried mined goods
+  std::vector<Tile_id> findings;
 };
 
 
