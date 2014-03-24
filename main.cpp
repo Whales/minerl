@@ -45,17 +45,25 @@ int main()
     if (ch == KEY_DOWN  || ch == 'j')  newy++;
 
     if (player.posy > 12) { // Can only use items underground
-      if (ch == 'w' && map.get_tile_id(player.posx, player.posy) != T_ladder) {
+      Tile_id here = map.get_tile_id(player.posx, player.posy);
+      if (ch == 'w' && here != T_ladder) {
         if (player.supplies[S_ladders] > 0) {
           player.supplies[S_ladders]--;
-          map.set_tile(player.posx, player.posy, T_ladder);
+          if (here == T_support) {
+            map.set_tile(player.posx, player.posy, T_ladder_and_support);
+          } else {
+            map.set_tile(player.posx, player.posy, T_ladder);
+          }
           player_took_turn = true;
         }
-      } else if (ch == 's' &&
-                 map.get_tile_id(player.posx, player.posy) != T_support) {
+      } else if (ch == 's' && here != T_support) {
         if (player.supplies[S_supports] > 0) {
           player.supplies[S_supports]--;
-          map.set_tile(player.posx, player.posy, T_support);
+          if (here == T_ladder) {
+            map.set_tile(player.posx, player.posy, T_ladder_and_support);
+          } else {
+            map.set_tile(player.posx, player.posy, T_support);
+          }
           player_took_turn = true;
         }
       }

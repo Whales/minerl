@@ -118,7 +118,7 @@ void Map::generate()
   int coal_veins = 5 * rng(10, 15);
   for (int i = 0; i < coal_veins; i++) {
     int x = rng(10, 110);
-    int y = rng(15, 25);
+    int y = rng(13, 25);
     add_vein(T_coal, x, y, rng(4, 8));
   }
 }
