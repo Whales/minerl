@@ -2,6 +2,7 @@
 #include "rng.h"
 #include "globals.h"
 #include "player.h"
+#include "geometry.h"
 
 Tile::Tile()
 {
@@ -121,6 +122,17 @@ void Map::generate()
     int y = rng(13, 25);
     add_vein(T_coal, x, y, rng(4, 8));
   }
+
+  int empty_veins = 5 * rng(20, 30);
+  int empty_y = 18;
+  for (int i = 0; i < empty_veins; i++) {
+    int x = rng(10, 110);
+    if (one_in(5)) {
+      empty_y += rng(1, 3);
+    }
+    add_vein(T_empty, x, empty_y, rng(3, 12));
+  }
+
 }
 
 void Map::add_vein(Tile_id type, int x, int y, int size)
@@ -186,11 +198,20 @@ void Map::draw(Window* w, Player* pl)
       if (x_ter == pl->posx && y_ter == pl->posy) {
         w->putglyph(x, y, glyph('@', c_white, c_black));
       } else {
-        Tile* tile = get_tile(x_ter, y_ter);
-        if (tile->seen) {
-          w->putglyph(x, y, tile->sym);
-        } else {
-          w->putglyph(x, y, glyph('x', c_black, c_black));
+        bool found_monster = false;
+        for (int i = 0; i < monsters.size() && !found_monster; i++) {
+          if (monsters[i].posx == x_ter && monsters[i].posy == y_ter) {
+            found_monster = true;
+            w->putglyph(x, y, monsters[i].type->sym);
+          }
+        }
+        if (!found_monster) {
+          Tile* tile = get_tile(x_ter, y_ter);
+          if (tile->seen) {
+            w->putglyph(x, y, tile->sym);
+          } else {
+            w->putglyph(x, y, glyph('x', c_black, c_black));
+          }
         }
       }
     }
@@ -255,5 +276,40 @@ void Map::process_falling(Player& pl)
 
   for (int i = 0; i < post.size(); i++) {
     add_falling(post[i].x, post[i].y);
+  }
+}
+
+void Map::spawn_monsters(Player &pl)
+{
+  std::vector<Point> valid_spawns;
+  int num_monsters = rng(2, 6);
+  for (int x = 0; x < 120; x++) {
+    for (int y = 15; y < pl.deepest_point; y++) {
+      if (get_tile_id(x, y) == T_empty) {
+        valid_spawns.push_back( Point(x, y) );
+      }
+    }
+  }
+
+  for (int i = 0; !valid_spawns.empty() && i < num_monsters; i++) {
+    Monster tmp;
+    Monster_id mid = Monster_id( rng(M_null + 1, M_max - 1) );
+    tmp.set_type( mid, &(MONSTERS[mid]) );
+    int index = rng(0, valid_spawns.size() - 1);
+    tmp.posx = valid_spawns[index].x;
+    tmp.posy = valid_spawns[index].y;
+    monsters.push_back(tmp);
+  }
+}
+
+void Map::move_monsters(Player &pl)
+{
+  for (int i = 0; i < monsters.size(); i++) {
+// If we're adjacent to the player, attack
+    Monster* mon = &(monsters[i]);
+    if (rl_dist(mon->posx, mon->posy, pl.posx, pl.posy) <= 1) {
+// TODO: Display a message.
+      pl.take_damage( mon->type->damage );
+    }
   }
 }

@@ -20,6 +20,7 @@ int main()
   Map map;
   map.generate();
   Player player;
+  int turn = 0;
 
   Window w_main(0, 0, 60, 24);
   Window w_hud(60, 0, 20, 24);
@@ -95,8 +96,11 @@ int main()
     }
 
     if (player_took_turn) {
-// TODO: Move monsters, boulders, etc
+      turn++;
       map.process_falling(player);
+      if (turn % 50 == 0) {
+        map.spawn_monsters(player);
+      }
     }
   }
 
@@ -139,6 +143,13 @@ void shop_upgrades(Player &pl)
         stat->set_level( stat->level + stat->upgrade_amount );
         stat->price += (stat->price * stat->price_increase) / 100;
         update_upgrade_ui(i_shop, pl);
+      }
+    } else if (ch == 'h' || ch == 'H') {
+      int needed_healing = pl.equipment[E_stamina].level - pl.max_stamina;
+      int heal_cost = 5 * needed_healing;
+      if (pl.cash >= heal_cost) {
+        pl.cash -= heal_cost;
+        pl.max_stamina = pl.equipment[E_stamina].level;
       }
     } else if (ch == 'q' || ch == 'Q') {
       return;
@@ -185,6 +196,15 @@ void update_upgrade_ui(cuss::interface &i_shop, Player &pl)
   i_shop.set_data("num_cost_sword",    pl.equipment[E_sword].price   );
   i_shop.set_data("num_cost_crossbow", pl.equipment[E_crossbow].price);
   i_shop.set_data("num_cost_lamp",     pl.equipment[E_lamp].price    );
+
+  i_shop.set_data("num_max_stamina",   pl.max_stamina);
+  int needed_healing = pl.equipment[E_stamina].level - pl.max_stamina;
+  int heal_cost = 5 * needed_healing;
+  i_shop.set_data("num_healed_stamina",pl.equipment[E_stamina].level );
+  i_shop.set_data("num_cost_healing",  heal_cost);
+  if (heal_cost > pl.cash) {
+    i_shop.set_data("num_cost_healing", c_red);
+  }
 }
 
 void shop_supplies(Player &pl)

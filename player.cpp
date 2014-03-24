@@ -6,6 +6,7 @@ Player::Player()
   posx = 60;
 
   cash = 0;
+  deepest_point = 12;
 
 //                                         Lev Price %Icr Amount bought
   equipment[E_stamina]  = Equipment_status(200, 200,  50, 50);
@@ -15,6 +16,8 @@ Player::Player()
   equipment[E_crossbow] = Equipment_status(  1, 100,  50,  1);
   equipment[E_lamp]     = Equipment_status(  2, 300, 100,  1);
   
+  max_stamina = equipment[E_stamina].level;
+
   for (int i = 0; i < S_max; i++) {
     supplies[i] = 0;
   }
@@ -30,9 +33,43 @@ Player::~Player()
 void Player::update_hud(cuss::interface &i_hud)
 {
   i_hud.set_data("num_stamina",     equipment[E_stamina].current);
-  i_hud.set_data("num_stamina_max", equipment[E_stamina].level);
+  int stam_percent = equipment[E_stamina].get_percent();
+  nc_color stam_color;
+  if (stam_percent == 100) {
+    stam_color = c_white;
+  } else if (stam_percent >= 75) {
+    stam_color = c_ltgray;
+  } else if (stam_percent >= 50) {
+    stam_color = c_ltgreen;
+  } else if (stam_percent >= 20) {
+    stam_color = c_yellow;
+  } else {
+    stam_color = c_ltred;
+  }
+  i_hud.set_data("num_stamina", stam_color);
+
+  if (equipment[E_stamina].level > max_stamina) {
+    i_hud.set_data("num_stamina_max", max_stamina);
+    i_hud.set_data("num_stamina_max", c_ltred);
+  } else {
+    i_hud.set_data("num_stamina_max", equipment[E_stamina].level);
+    i_hud.set_data("num_stamina_max", c_white);
+  }
+
   i_hud.set_data("num_storage",     get_storage());
+  if (get_storage() <= 3) {
+    i_hud.set_data("num_storage", c_ltred);
+  } else {
+    i_hud.set_data("num_storage", c_ltgray);
+  }
+
   i_hud.set_data("num_ladders",     supplies[S_ladders]);
+  if (supplies[S_ladders] <= 3) {
+    i_hud.set_data("num_storage", c_ltred);
+  } else {
+    i_hud.set_data("num_storage", c_ltgray);
+  }
+
   i_hud.set_data("num_rope",        supplies[S_rope]);
   i_hud.set_data("num_supports",    supplies[S_supports]);
 }
@@ -55,6 +92,9 @@ int Player::get_lamp_radius()
 void Player::reset_values()
 {
   equipment[E_stamina].reset();
+  if (equipment[E_stamina].current > max_stamina) {
+    equipment[E_stamina].current = max_stamina;
+  }
 }
 
 bool Player::move(Map* map, int movex, int movey)
@@ -114,6 +154,9 @@ bool Player::move(Map* map, int movex, int movey)
     if (use_stamina(data_here->climb_cost)) {
       posx = movex;
       posy = movey;
+      if (posy > deepest_point) {
+        deepest_point = posy;
+      }
       return true;
     }
     return false;
@@ -148,6 +191,18 @@ bool Player::use_stamina(int amount)
 {
   if (equipment[E_stamina].current >= amount) {
     equipment[E_stamina].current -= amount;
+    return true;
+  }
+  return false;
+}
+
+bool Player::take_damage(int amount)
+{
+  max_stamina -= amount;
+  if (equipment[E_stamina].current > max_stamina) {
+    equipment[E_stamina].current = max_stamina;
+  }
+  if (max_stamina <= 0) {
     return true;
   }
   return false;

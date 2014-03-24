@@ -4,6 +4,7 @@
 #include "tiledata.h"
 #include "window.h"
 #include "geometry.h"
+#include "monster.h"
 #include <vector>
 
 class Player;
@@ -42,6 +43,10 @@ public:
   void add_falling(int x, int y);
 
   void process_falling(Player& pl);
+  void spawn_monsters (Player& pl);
+  void move_monsters  (Player& pl);
+
+  std::vector<Monster> monsters;
 
 private:
   std::vector< std::vector<Tile> > tiles;

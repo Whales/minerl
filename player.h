@@ -59,6 +59,11 @@ struct Equipment_status
   {
     current = level;
   }
+
+  int get_percent()
+  {
+    return (100 * current) / level;
+  }
 };
 
 class Player
@@ -80,10 +85,13 @@ public:
   bool fall_if_needed(Map* map);
 // Returns true if we had enough
   bool use_stamina(int amount);
+// Returns true if we died!
+  bool take_damage(int amount);
   void add_finding(Tile_id id);
 
   int posx, posy;
-  int stamina;
+  int deepest_point;
+  int max_stamina;
 
 // "Permanent" values
   int cash;

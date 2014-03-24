@@ -3,6 +3,7 @@
 Tile_datum TILES[T_max];
 int COST[S_max];
 int AMT[S_max];
+Monster_type MONSTERS[M_max];
 
 void init_data()
 {
@@ -14,8 +15,8 @@ void init_data()
                                  "", "sky");
   TILES[T_grass]    = Tile_datum(c_green,   c_cyan,   false, false, 0, 0, 0,
                                  "_", "grass");
-  TILES[T_shop]     = Tile_datum(c_green,   c_black,  false, false, 0, 0, 0,
-                                 "$", "shop");
+  TILES[T_shop]     = Tile_datum(c_black,   c_blue,   false, false, 0, 0, 0,
+                                 "=", "shop");
   TILES[T_dirt]     = Tile_datum(c_ltgray,  c_brown,  true,  false, 5, 0, 0,
                                  "   `~,.'^", "dirt");
   TILES[T_boulder]  = Tile_datum(c_ltgray,  c_black,  true,  false, 0, 0, 0,
@@ -44,5 +45,10 @@ void init_data()
 
   COST[S_supports]  =   7;
   AMT [S_supports]  =   1;
+
+  MONSTERS[M_worm]        = Monster_type(8, 1, 2, 1, 'w', c_ltred, 0);
+  MONSTERS[M_cockroach]   = Monster_type(3, 1, 5, 1, 'c', c_brown, 0);
+  MONSTERS[M_termite]     = Monster_type(3, 1, 5, 1, 'c', c_red,
+                              T_ladder, T_support, T_ladder_and_support, 0);
 
 }
