@@ -15,6 +15,7 @@ enum Tile_id
   T_boulder,
   T_ladder,
   T_support,
+  T_entrance,
 
   T_coal,
   T_max

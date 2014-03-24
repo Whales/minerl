@@ -24,6 +24,8 @@ void init_data()
                                  "H", "ladder");
   TILES[T_support]  = Tile_datum(c_ltred,   c_black,  false, true,  0, 0, 0,
                                  "|", "support");
+  TILES[T_entrance] = Tile_datum(c_black,   c_cyan,   false, false, 0, 0, 0,
+                                 "M", "entrance");
   TILES[T_coal]     = Tile_datum(c_black,   c_brown,  true,  true,  8, 0, 5,
                                  "#", "coal");
 

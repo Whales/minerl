@@ -5,9 +5,10 @@ Player::Player()
   posy = 12;
   posx = 60;
 
-  cash = 500;
+  cash = 0;
 
-  equipment[E_stamina]  = Equipment_status(500, 200,  50, 50);
+//                                         Lev Price %Icr Amount bought
+  equipment[E_stamina]  = Equipment_status(200, 200,  50, 50);
   equipment[E_backpack] = Equipment_status( 15, 100,  50,  3);
   equipment[E_pickaxe]  = Equipment_status(  1, 100,  50,  1);
   equipment[E_sword]    = Equipment_status(  1, 100,  50,  1);
@@ -17,8 +18,9 @@ Player::Player()
   for (int i = 0; i < S_max; i++) {
     supplies[i] = 0;
   }
+  supplies[S_auger]    =  1;
   supplies[S_ladders]  = 20;
-  supplies[S_supports] = 5;
+  supplies[S_supports] =  5;
 }
 
 Player::~Player()
@@ -68,17 +70,24 @@ bool Player::move(Map* map, int movex, int movey)
 // Can't move there; maybe dig?
   if (data->blocks) {
     if (data->dig > 0) {
+      bool using_auger = false;
       if (posy == 12) { // We need an auger!
         if (supplies[S_auger] <= 0) {
 // TODO: Add a message about needing an auger
           return false; // Can't dig without it
         }
+        map->set_tile(posx, posy, T_entrance);
         supplies[S_auger]--;
+        using_auger = true;
       }
       Tile* tile = map->get_tile(movex, movey);
       Tile_id finding_id = tile->id;
       if (use_stamina(1)) {
-        if (tile->dig( get_dig_power() )) {
+        int dig_power = get_dig_power();
+        if (using_auger) {
+          dig_power = 500;
+        }
+        if (tile->dig( dig_power )) {
           if (data->valuable()) {
             add_finding(finding_id);
           }
@@ -98,6 +107,9 @@ bool Player::move(Map* map, int movex, int movey)
   if (movey < posy) {
     if (data_here->climb_cost == 0) {
       return false; // We can't climb
+    }
+    if (map->get_tile_id(movex, movey) == T_grass) {
+      return false; // Can't move up to grass; need a mine entrance.
     }
     if (use_stamina(data_here->climb_cost)) {
       posx = movex;
@@ -119,6 +131,9 @@ bool Player::move(Map* map, int movex, int movey)
 
 bool Player::fall_if_needed(Map* map)
 {
+  if (map->get_tile_id(posx, posy) == T_grass) {
+    return false;
+  }
   Tile_datum* below = map->get_tile_data(posx, posy + 1);
   if (below->blocks || below->climb_cost > 0) {
     return false;
