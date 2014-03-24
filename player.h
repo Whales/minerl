@@ -9,6 +9,7 @@
 enum Supplies
 {
   S_null = 0,
+  S_auger,
   S_ladders,
   S_rope,
   S_supports,

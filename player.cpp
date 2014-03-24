@@ -68,6 +68,13 @@ bool Player::move(Map* map, int movex, int movey)
 // Can't move there; maybe dig?
   if (data->blocks) {
     if (data->dig > 0) {
+      if (posy == 12) { // We need an auger!
+        if (supplies[S_auger] <= 0) {
+// TODO: Add a message about needing an auger
+          return false; // Can't dig without it
+        }
+        supplies[S_auger]--;
+      }
       Tile* tile = map->get_tile(movex, movey);
       Tile_id finding_id = tile->id;
       if (use_stamina(1)) {

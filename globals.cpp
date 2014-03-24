@@ -27,11 +27,16 @@ void init_data()
   TILES[T_coal]     = Tile_datum(c_black,   c_brown,  true,  true,  8, 0, 5,
                                  "#", "coal");
 
-  COST[S_ladders]   = 20;
-  AMT [S_ladders]   =  5;
-  COST[S_rope]      =  5;
-  AMT [S_rope]      =  1;
-  COST[S_supports]  =  7;
-  AMT [S_supports]  =  1;
+  COST[S_auger]     = 500;
+  AMT [S_auger]     =   1;
+
+  COST[S_ladders]   =  20;
+  AMT [S_ladders]   =   5;
+
+  COST[S_rope]      =   5;
+  AMT [S_rope]      =   1;
+
+  COST[S_supports]  =   7;
+  AMT [S_supports]  =   1;
 
 }
