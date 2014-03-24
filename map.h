@@ -31,6 +31,7 @@ public:
 
   void reset_null_tile();
   void generate();
+  void add_vein(Tile_id type, int x, int y, int size);
 
   Tile*       get_tile     (int x, int y);
   Tile_id     get_tile_id  (int x, int y);

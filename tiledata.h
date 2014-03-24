@@ -18,6 +18,7 @@ enum Tile_id
   T_entrance,
 
   T_coal,
+ 
   T_max
 };
 

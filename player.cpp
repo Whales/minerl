@@ -72,7 +72,7 @@ bool Player::move(Map* map, int movex, int movey)
     if (data->dig > 0) {
       bool using_auger = false;
       if (posy == 12) { // We need an auger!
-        if (supplies[S_auger] <= 0) {
+        if (supplies[S_auger] <= 0 || map->get_tile_id(posx, posy) == T_shop) {
 // TODO: Add a message about needing an auger
           return false; // Can't dig without it
         }

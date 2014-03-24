@@ -89,6 +89,7 @@ void Map::generate()
     tiles.push_back(tmp);
   }
 
+// Set the base terrain; sky, grass, and dirt.
   for (int x = 0; x < 120; x++) {
     for (int y = 0; y < 120; y++) {
       if (y < 12) {
@@ -101,24 +102,45 @@ void Map::generate()
         if (y == 13 || y == 14) {
           tiles[x][y].seen = true;
         }
-        bool set = false;
-        if (y >= 13 && y <= 20) {
-          if (one_in(6)) {
-            set = true;
-            tiles[x][y].set_id(T_coal);
-          } else if (one_in(15)) {
-            set = true;
-            tiles[x][y].set_id(T_boulder);
-          }
-        }
-        if (!set) {
+        if (one_in(10)) {
+          tiles[x][y].set_id(T_boulder);
+        } else {
           tiles[x][y].set_id(T_dirt);
         }
       }
     }
   }
 
+// We need a shop, of course...
   tiles[65][12].set_id(T_shop);
+
+// Now place some veins.
+  int coal_veins = 5 * rng(10, 15);
+  for (int i = 0; i < coal_veins; i++) {
+    int x = rng(10, 110);
+    int y = rng(15, 25);
+    add_vein(T_coal, x, y, rng(4, 8));
+  }
+}
+
+void Map::add_vein(Tile_id type, int x, int y, int size)
+{
+  set_tile(x, y, type);
+  for (int i = 0; i < size; i++) {
+    int move = (y <= 15 ? rng(1, 3) : rng(1, 4));
+    switch (move) {
+      case 1: x++;  break;
+      case 2: x--;  break;
+      case 3: y++;  break;
+      case 4: y--;  break;
+    }
+    Tile_id id = get_tile_id(x, y);
+    if (id == T_dirt) {
+      set_tile(x, y, type);
+    } else if (id != T_boulder && !one_in(4)) {
+      i--;  // 75% of the time, don't use up part of our size
+    }
+  }
 }
 
 Tile* Map::get_tile(int x, int y)
