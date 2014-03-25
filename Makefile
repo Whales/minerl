@@ -11,8 +11,8 @@ ODIR = obj
 DDIR = .deps
 
 TARGET = minerl
-#CUSSED_TARGET = cussed
-#CUSSTEST_TARGET = cusstest
+CUSSED_TARGET = cussed
+CUSSTEST_TARGET = cusstest
 
 OS  = $(shell uname -o)
 CXX = g++
@@ -26,29 +26,29 @@ LDFLAGS = -lncurses
 endif
 
 SOURCES = $(filter-out cuss_editor.cpp cusstest.cpp, $(wildcard *.cpp))
-#CUSSED_SOURCES = cuss.cpp cuss_editor.cpp window.cpp glyph.cpp color.cpp stringfunc.cpp files.cpp
-#CUSSTEST_SOURCES = cuss.cpp cusstest.cpp window.cpp glyph.cpp color.cpp stringfunc.cpp files.cpp
+CUSSED_SOURCES = cuss.cpp cuss_editor.cpp window.cpp glyph.cpp color.cpp stringfunc.cpp files.cpp
+CUSSTEST_SOURCES = cuss.cpp cusstest.cpp window.cpp glyph.cpp color.cpp stringfunc.cpp files.cpp
 _OBJS = $(SOURCES:.cpp=.o)
-#_CUSSED_OBJS = $(CUSSED_SOURCES:.cpp=.o)
-#_CUSSTEST_OBJS = $(CUSSTEST_SOURCES:.cpp=.o)
+_CUSSED_OBJS = $(CUSSED_SOURCES:.cpp=.o)
+_CUSSTEST_OBJS = $(CUSSTEST_SOURCES:.cpp=.o)
 OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
-#CUSSED_OBJS = $(patsubst %,$(ODIR)/%,$(_CUSSED_OBJS))
-#CUSSTEST_OBJS = $(patsubst %,$(ODIR)/%,$(_CUSSTEST_OBJS))
+CUSSED_OBJS = $(patsubst %,$(ODIR)/%,$(_CUSSED_OBJS))
+CUSSTEST_OBJS = $(patsubst %,$(ODIR)/%,$(_CUSSTEST_OBJS))
 
-#all: $(TARGET) $(CUSSED_TARGET) $(CUSSTEST_TARGET)
+all: $(TARGET) $(CUSSED_TARGET) $(CUSSTEST_TARGET)
 	#@
 
-all: $(TARGET)
+#all: $(TARGET)
   #@
 
 $(TARGET): $(ODIR) $(DDIR) $(OBJS)
 	$(CXX) -o $(TARGET) $(CFLAGS) $(OBJS) $(LDFLAGS) 
 
-#$(CUSSED_TARGET): $(ODIR) $(DDIR) $(CUSSED_OBJS)
-	#$(CXX) -o $(CUSSED_TARGET) $(CFLAGS) $(CUSSED_OBJS) $(LDFLAGS) 
+$(CUSSED_TARGET): $(ODIR) $(DDIR) $(CUSSED_OBJS)
+	$(CXX) -o $(CUSSED_TARGET) $(CFLAGS) $(CUSSED_OBJS) $(LDFLAGS) 
 
-#$(CUSSTEST_TARGET): $(ODIR) $(DDIR) $(CUSSTEST_OBJS)
-	#$(CXX) -o $(CUSSTEST_TARGET) $(CFLAGS) $(CUSSTEST_OBJS) $(LDFLAGS) 
+$(CUSSTEST_TARGET): $(ODIR) $(DDIR) $(CUSSTEST_OBJS)
+	$(CXX) -o $(CUSSTEST_TARGET) $(CFLAGS) $(CUSSTEST_OBJS) $(LDFLAGS) 
 
 $(ODIR):
 	mkdir $(ODIR)
