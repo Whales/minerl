@@ -3,6 +3,7 @@
 #include "globals.h"
 #include "player.h"
 #include "geometry.h"
+#include <vector>
 
 Tile::Tile()
 {
@@ -307,9 +308,215 @@ void Map::move_monsters(Player &pl)
   for (int i = 0; i < monsters.size(); i++) {
 // If we're adjacent to the player, attack
     Monster* mon = &(monsters[i]);
-    if (rl_dist(mon->posx, mon->posy, pl.posx, pl.posy) <= 1) {
+    if (mon->rest > 0) {
+      mon->rest--;
+    } else {
+      int dist = rl_dist(mon->posx, mon->posy, pl.posx, pl.posy);
+      if (pl.posy > 12 && dist <= 1) {
 // TODO: Display a message.
-      pl.take_damage( mon->type->damage );
+        pl.take_damage( mon->type->damage );
+      } else if (pl.posy > 12 && dist <= mon->type->awareness) {
+        mon->path = path(mon->type, mon->posx, mon->posy, pl.posx, pl.posy);
+        if (mon->path.empty()) {  // Couldn't find a route to player
+          mon->path_to_target(this);  // ... so path to something else.
+        }
+        mon->follow_path(this);
+      } else if (!mon->path.empty()) {
+        mon->follow_path(this);
+      } else {  // Nowhere near player; find something to eat?
+        mon->path_to_target(this);
+        mon->follow_path(this);
+      }
     }
   }
+}
+
+enum A_star_status
+{
+  AS_none,
+  AS_open,
+  AS_closed
+};
+  
+
+std::vector<Point> Map::path(Monster_type* type,
+                             int origx, int origy, int destx, int desty)
+{
+  bool tools = false, climb = false, fly = false;
+  if (type) {
+    tools = type->tools;
+    climb = type->climb;
+    fly   = type->fly;
+  }
+
+  int min_x = (origx < destx ? origx - 3 : destx - 3);
+  int max_x = (origx > destx ? origx + 3 : destx + 3);
+  int min_y = (origy < desty ? origy - 3 : desty - 3);
+  int max_y = (origy > desty ? origy + 3 : desty + 3);
+
+  if (min_x < 0) {
+    min_x = 0;
+  }
+  if (max_x > 119) {
+    max_x = 119;
+  }
+  if (min_y < 13) {
+    min_y = 13;
+  }
+  if (max_y > 119) {
+    max_y = 119;
+  }
+
+  int x_size = max_x - min_x + 1;
+  int y_size = max_y - min_y + 1;
+
+  origx -= min_x;
+  origy -= min_y;
+  destx -= min_x;
+  desty -= min_y;
+
+  std::vector<Point> open_points;
+  A_star_status status[x_size][y_size];
+  int           gscore[x_size][y_size];
+  int           hscore[x_size][y_size];
+  Point         parent[x_size][y_size];
+
+// Init everything to 0
+  for (int x = 0; x < x_size; x++) {
+    for (int y = 0; y < y_size; y++) {
+      status[x][y] = AS_none;
+      gscore[x][y] = 0;
+      hscore[x][y] = 0;
+      parent[x][y] = Point(-1, -1);
+    }
+  }
+
+  status[origx][origy] = AS_open;
+  open_points.push_back( Point(origx, origy) );
+  bool done = false;
+
+  while (!done && !open_points.empty()) {
+// 1) Find the lowest cost in open_points, and set (current) to that point
+    int lowest_cost = -1, point_index = -1;
+    Point current;
+    int current_g = 0;
+    for (int i = 0; i < open_points.size(); i++) {
+      Point p = open_points[i];
+      int score = gscore[p.x][p.y] + hscore[p.x][p.y];
+      if (i == 0 || score < lowest_cost) {
+        lowest_cost = score;
+        current = p;
+        current_g = gscore[p.x][p.y];
+        point_index = i;
+      }
+    }
+// 2) Check if (current) is the endpoint
+    if (current.x == destx && current.y == desty) {
+      done = true;
+    } else {
+// 3) Set (current) to be closed
+      open_points.erase(open_points.begin() + point_index);
+      status[current.x][current.y] = AS_closed;
+// 4) Examine all adjacent points
+//  4a) We can go up if we fly, we use tools, or we climb & there's something to
+//      climb on.
+      Tile_datum* U_data  = get_tile_data(current.x    , current.y - 1);
+      Tile_datum* UL_data = get_tile_data(current.x - 1, current.y - 1);
+      Tile_datum* UR_data = get_tile_data(current.x + 1, current.y - 1);
+      bool go_up = (fly || tools);
+      if (!go_up && climb) {
+        if (UL_data->blocks || UR_data->blocks || U_data->climb_cost > 0) {
+          go_up = true;
+        }
+      }
+// Cycle through all four adjacent points.
+      for (int i = 1; i <= 4; i++) {
+        int nx = current.x, ny = current.y;
+        switch (i) {
+          case 1: nx = current.x - 1; break;
+          case 2: nx = current.x + 1; break;
+          case 3: ny = current.y - 1; break;
+          case 4: ny = current.y + 1; break;
+        }
+        int cost = pathing_cost(type, current.x, current.y, nx, ny);
+// Only check the spot if we can go up, or if it's not an upwards move.
+        if (cost > 0 && (ny >= current.y || go_up)) {
+          int nx = current.x, ny = current.y - 1;
+          int ng = current_g + cost;
+// If it's unexamined, make it open and set its values.
+          if (status[nx][ny] == AS_none) {
+            status[nx][ny] = AS_open;
+            gscore[nx][ny] = ng;
+            hscore[nx][ny] = manhattan_dist(nx, ny, destx, desty);
+            parent[nx][ny] = current;
+            open_points.push_back( Point(nx, ny) );
+// Otherwise, if it's open and we're a better parent, make us the parent
+          } else if (status[nx][ny] == AS_open && ng < gscore[nx][ny]) {
+            gscore[nx][ny] = ng;
+            parent[nx][ny] = current;
+          }
+        }
+      } // end of for loop over adjacent tiles
+    } // end of "this isn't the end tile" block
+  } // while (!done && !open_points.empty())
+
+  std::vector<Point> ret;
+  if (open_points.empty()) {
+    return ret; // Couldn't find a path!
+  }
+
+// Above, we subtraced min_x from origx, etc.  So we have to add it back in now.
+  Point cur(destx, desty);
+  ret.push_back( Point(cur.x + min_x, cur.y + min_y) );
+  while (parent[cur.x][cur.y] != Point(origx, origy)) {
+    cur = parent[cur.x][cur.y];
+    ret.push_back( Point(cur.x + min_x, cur.y + min_y) );
+  }
+// Now, reverse the list (oy vey)
+  std::vector<Point> real_ret;
+  for (int i = ret.size() - 1; i >= 0; i--) {
+    real_ret.push_back(ret[i]);
+  }
+
+  return real_ret;
+}
+
+int Map::pathing_cost(Monster_type* type, int curx, int cury, int x, int y)
+{
+  int dig = 1, dig_delay = 1;
+  bool tools = false, climb = false, fly = false;
+  if (type) {
+    dig = type->dig;
+    dig_delay = type->dig_delay;
+    tools = type->tools;
+    climb = type->climb;
+    fly   = type->fly;
+  }
+  Tile_datum* data = get_tile_data(x, y);
+  Tile* tile = get_tile(x, y);
+  int ret = 0;
+  if (data->blocks) { // Start with time to dig
+    if (type->dig > 0) {
+      ret = (tile->hp / dig) * dig_delay;
+    } else {
+      return 0; // Can't get through it!
+    }
+  }
+  if (y < cury) { // Gotta move up
+    if (fly || climb) {
+// Don't check climbability here; pathfinder does that!
+      ret++;  // Just takes a turn to fly up
+    } else if (tools) {
+      if (get_tile_data(curx, cury)->climb_cost > 0) {
+        ret++;
+      } else {
+        ret += 2; // One extra turn to place a ladder!
+      }
+    } else {  // No way to move up!
+      return 0;
+    }
+  } else {
+    ret++;  // Non-vertical moves always take one turn.
+  }
+  return ret;
 }

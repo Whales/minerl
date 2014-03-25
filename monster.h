@@ -3,7 +3,11 @@
 
 #include "tiledata.h"
 #include "glyph.h"
+#include "geometry.h"
 #include <vector>
+#include <cstdarg>  // For variadic constructor
+
+class Map;
 
 enum Monster_id
 {
@@ -20,6 +24,10 @@ struct Monster_type
   int dig;
   int dig_delay;
   int damage;
+  int awareness;
+  bool tools;
+  bool climb;
+  bool fly;
   glyph sym;
   std::vector<Tile_id> targets;
 
@@ -31,8 +39,10 @@ struct Monster_type
     damage = 1;
   }
 
-  Monster_type(int H, int D, int DD, int DAM, char S, nc_color FG, ...) :
-    hp (H), dig (D), dig_delay (DD), damage (DAM)
+  Monster_type(int H, int D, int DD, int DAM, int A, bool T, bool C, bool F,
+               char S, nc_color FG, ...) :
+    hp (H), dig (D), dig_delay (DD), damage (DAM), awareness (A), tools (T),
+    climb (C), fly (F)
   {
     sym = glyph(S, FG, c_black);
     va_list ap;
@@ -48,18 +58,26 @@ struct Monster_type
 
 struct Monster
 {
+  Monster();
+
   Monster_id id;
   Monster_type* type;
   int hp;
+  int rest;
   int posx;
   int posy;
 
-  void set_type(Monster_id mid, Monster_type* mtype)
-  {
-    id = mid;
-    type = mtype;
-    hp = type->hp;
-  }
+  std::vector<Point> path;
+
+  void follow_path(Map* map);
+  void move(Map* map, int movex, int movey);
+// Returns true if we fell
+  bool fall_if_needed(Map* map);
+  void path_to_target(Map* map);
+
+  void set_type(Monster_id mid, Monster_type* mtype = NULL);
+private:
+  void path_to_random_target(Map* map);
 };
 
 #endif

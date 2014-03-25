@@ -98,6 +98,7 @@ int main()
     if (player_took_turn) {
       turn++;
       map.process_falling(player);
+      map.move_monsters(player);
       if (turn % 50 == 0) {
         map.spawn_monsters(player);
       }
