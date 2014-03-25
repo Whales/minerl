@@ -3,6 +3,7 @@
 #include "geometry.h"
 #include "globals.h"
 #include "rng.h"
+#include "window.h"
 #include <vector>
 
 Monster::Monster()
@@ -34,6 +35,7 @@ void Monster::follow_path(Map* map)
 
 // Make sure the next step in the path is adjacent to us.
   if (rl_dist(posx, posy, path[0].x, path[0].y) > 1) {
+    debugmsg("Bad path");
     std::vector<Point> tmp = map->path(type, posx, posy, path[0].x, path[0].y);
     for (int i = tmp.size() - 1; i >= 0; i--) {
       path.insert( path.begin(), tmp[i] );
@@ -56,9 +58,11 @@ void Monster::follow_path(Map* map)
 void Monster::move(Map* map, int movex, int movey)
 {
   if (posx == movex && posy == movey) {
+    debugmsg("Monster paused");
     return;
   }
   if (!map) {
+    debugmsg("Monster::move(NULL,...");
     return;
   }
 
@@ -76,6 +80,7 @@ void Monster::move(Map* map, int movex, int movey)
           bouldery--;
         }
       }
+      debugmsg("Monster dig");
       fall_if_needed(map);
       rest = type->dig_delay - 1; // Some monsters take several turns to dig
       return;
@@ -86,12 +91,15 @@ void Monster::move(Map* map, int movex, int movey)
     if (type->climb || type->fly || data_here->climb_cost > 0) {
       posx = movex;
       posy = movey;
+      debugmsg("Monster moved");
     } else if (type->tools) {
       map->set_tile(posx, posy, T_ladder);
+      debugmsg("Monster put ladder");
     }
   } else {
     posx = movex;
     posy = movey;
+    debugmsg("Monster moved");
   }
   fall_if_needed(map);
 }

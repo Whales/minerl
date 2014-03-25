@@ -283,7 +283,7 @@ void Map::process_falling(Player& pl)
 void Map::spawn_monsters(Player &pl)
 {
   std::vector<Point> valid_spawns;
-  int num_monsters = rng(2, 6);
+  int num_monsters = rng(1, 2);
   for (int x = 0; x < 120; x++) {
     for (int y = 15; y < pl.deepest_point; y++) {
       if (get_tile_id(x, y) == T_empty) {
@@ -318,13 +318,17 @@ void Map::move_monsters(Player &pl)
       } else if (pl.posy > 12 && dist <= mon->type->awareness) {
         mon->path = path(mon->type, mon->posx, mon->posy, pl.posx, pl.posy);
         if (mon->path.empty()) {  // Couldn't find a route to player
+          debugmsg("No path");
           mon->path_to_target(this);  // ... so path to something else.
         }
+        debugmsg("path size %d", mon->path.size());
         mon->follow_path(this);
       } else if (!mon->path.empty()) {
+        debugmsg("path size %d", mon->path.size());
         mon->follow_path(this);
       } else {  // Nowhere near player; find something to eat?
         mon->path_to_target(this);
+        debugmsg("path size %d", mon->path.size());
         mon->follow_path(this);
       }
     }

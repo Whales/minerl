@@ -2,6 +2,8 @@
 #include "globals.h"
 #include "map.h"
 #include "player.h"
+#include "rng.h"
+#include <ctime>
 
 void sell_findings(Player &pl);
 
@@ -13,6 +15,8 @@ void update_supply_ui(cuss::interface &i_shop, Player &pl);
 
 int main()
 {
+  srand(time(NULL));
+
   init_display();
 
   init_data();
@@ -30,7 +34,7 @@ int main()
     return 1;
   }
 
-  char ch;
+  long ch;
   while (ch != 'q') {
     map.draw(&w_main, &player);
     player.update_hud(i_hud);

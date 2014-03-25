@@ -36,10 +36,8 @@ CUSSED_OBJS = $(patsubst %,$(ODIR)/%,$(_CUSSED_OBJS))
 CUSSTEST_OBJS = $(patsubst %,$(ODIR)/%,$(_CUSSTEST_OBJS))
 
 all: $(TARGET) $(CUSSED_TARGET) $(CUSSTEST_TARGET)
-	#@
 
 #all: $(TARGET)
-  #@
 
 $(TARGET): $(ODIR) $(DDIR) $(OBJS)
 	$(CXX) -o $(TARGET) $(CFLAGS) $(OBJS) $(LDFLAGS) 
