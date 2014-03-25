@@ -318,17 +318,17 @@ void Map::move_monsters(Player &pl)
       } else if (pl.posy > 12 && dist <= mon->type->awareness) {
         mon->path = path(mon->type, mon->posx, mon->posy, pl.posx, pl.posy);
         if (mon->path.empty()) {  // Couldn't find a route to player
-          debugmsg("No path");
+          //debugmsg("No path");
           mon->path_to_target(this);  // ... so path to something else.
         }
-        debugmsg("path size %d", mon->path.size());
+        //debugmsg("path size %d", mon->path.size());
         mon->follow_path(this);
       } else if (!mon->path.empty()) {
-        debugmsg("path size %d", mon->path.size());
+        //debugmsg("path size %d", mon->path.size());
         mon->follow_path(this);
       } else {  // Nowhere near player; find something to eat?
         mon->path_to_target(this);
-        debugmsg("path size %d", mon->path.size());
+        //debugmsg("path size %d", mon->path.size());
         mon->follow_path(this);
       }
     }
@@ -346,6 +346,7 @@ enum A_star_status
 std::vector<Point> Map::path(Monster_type* type,
                              int origx, int origy, int destx, int desty)
 {
+  //debugmsg("Pathing [%d:%d] => [%d:%d]", origx, origy, destx, desty);
   bool tools = false, climb = false, fly = false;
   if (type) {
     tools = type->tools;
@@ -378,6 +379,11 @@ std::vector<Point> Map::path(Monster_type* type,
   origy -= min_y;
   destx -= min_x;
   desty -= min_y;
+
+/*
+  debugmsg("Prepped: bounds [%d:%d]/[%d:%d], path [%d:%d] => [%d:%d]",
+           min_x, min_y, max_x, max_y, origx, origy, destx, desty);
+*/
 
   std::vector<Point> open_points;
   A_star_status status[x_size][y_size];
@@ -437,15 +443,14 @@ std::vector<Point> Map::path(Monster_type* type,
       for (int i = 1; i <= 4; i++) {
         int nx = current.x, ny = current.y;
         switch (i) {
-          case 1: nx = current.x - 1; break;
-          case 2: nx = current.x + 1; break;
-          case 3: ny = current.y - 1; break;
-          case 4: ny = current.y + 1; break;
+          case 1: nx--; break;
+          case 2: nx++; break;
+          case 3: ny--; break;
+          case 4: ny++; break;
         }
         int cost = pathing_cost(type, current.x, current.y, nx, ny);
 // Only check the spot if we can go up, or if it's not an upwards move.
         if (cost > 0 && (ny >= current.y || go_up)) {
-          int nx = current.x, ny = current.y - 1;
           int ng = current_g + cost;
 // If it's unexamined, make it open and set its values.
           if (status[nx][ny] == AS_none) {
