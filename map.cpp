@@ -449,29 +449,31 @@ std::vector<Point> Map::path(Monster_id type,
           case 3: ny--; break;
           case 4: ny++; break;
         }
-        int cost = pathing_cost(type, current.x, current.y, nx, ny);
+        if (nx < 0 && ny < 0 && nx < x_size && ny < y_size) {
+          int cost = pathing_cost(type, current.x, current.y, nx, ny);
 // Only check the spot if we can go up, or if it's not an upwards move.
-        if (cost > 0 && (ny >= current.y || go_up)) {
-          int ng = current_g + cost;
+          if (cost > 0 && (ny >= current.y || go_up)) {
+            int ng = current_g + cost;
 // If it's unexamined, make it open and set its values.
-          if (status[nx][ny] == AS_none) {
-            status[nx][ny] = AS_open;
-            gscore[nx][ny] = ng;
-            hscore[nx][ny] = manhattan_dist(nx, ny, destx, desty);
-            parent[nx][ny] = current;
-            open_points.push_back( Point(nx, ny) );
+            if (status[nx][ny] == AS_none) {
+              status[nx][ny] = AS_open;
+              gscore[nx][ny] = ng;
+              hscore[nx][ny] = manhattan_dist(nx, ny, destx, desty);
+              parent[nx][ny] = current;
+              open_points.push_back( Point(nx, ny) );
 // Otherwise, if it's open and we're a better parent, make us the parent
-          } else if (status[nx][ny] == AS_open && ng < gscore[nx][ny]) {
-            gscore[nx][ny] = ng;
-            parent[nx][ny] = current;
+            } else if (status[nx][ny] == AS_open && ng < gscore[nx][ny]) {
+              gscore[nx][ny] = ng;
+              parent[nx][ny] = current;
+            }
           }
-        }
+        } // end of "nx & ny are inbounds" if block
       } // end of for loop over adjacent tiles
     } // end of "this isn't the end tile" block
   } // while (!done && !open_points.empty())
 
   std::vector<Point> ret;
-  if (open_points.empty()) {
+  if (!done) {
     return ret; // Couldn't find a path!
   }
 
@@ -480,6 +482,9 @@ std::vector<Point> Map::path(Monster_id type,
   ret.push_back( Point(cur.x + min_x, cur.y + min_y) );
   while (parent[cur.x][cur.y] != Point(origx, origy)) {
     cur = parent[cur.x][cur.y];
+    if (cur.x < 0 || cur.y < 0 || cur.x >= x_size || cur.y >= y_size) {
+      debugmsg("Cur %s", cur.str().c_str());
+    }
     ret.push_back( Point(cur.x + min_x, cur.y + min_y) );
   }
 // Now, reverse the list (oy vey)
