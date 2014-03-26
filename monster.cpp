@@ -36,7 +36,7 @@ void Monster::follow_path(Map* map)
 // Make sure the next step in the path is adjacent to us.
   if (rl_dist(posx, posy, path[0].x, path[0].y) > 1) {
     debugmsg("Bad path");
-    std::vector<Point> tmp = map->path(type, posx, posy, path[0].x, path[0].y);
+    std::vector<Point> tmp = map->path(id, posx, posy, path[0].x, path[0].y);
     for (int i = tmp.size() - 1; i >= 0; i--) {
       path.insert( path.begin(), tmp[i] );
     }
@@ -58,7 +58,7 @@ void Monster::follow_path(Map* map)
 void Monster::move(Map* map, int movex, int movey)
 {
   if (posx == movex && posy == movey) {
-    debugmsg("Monster paused");
+    //debugmsg("Monster paused");
     return;
   }
   if (!map) {
@@ -80,7 +80,7 @@ void Monster::move(Map* map, int movex, int movey)
           bouldery--;
         }
       }
-      debugmsg("Monster dig");
+      //debugmsg("Monster dig");
       fall_if_needed(map);
       rest = type->dig_delay - 1; // Some monsters take several turns to dig
       return;
@@ -91,15 +91,15 @@ void Monster::move(Map* map, int movex, int movey)
     if (type->climb || type->fly || data_here->climb_cost > 0) {
       posx = movex;
       posy = movey;
-      debugmsg("Monster moved");
+      //debugmsg("Monster moved");
     } else if (type->tools) {
       map->set_tile(posx, posy, T_ladder);
-      debugmsg("Monster put ladder");
+      //debugmsg("Monster put ladder");
     }
   } else {
     posx = movex;
     posy = movey;
-    debugmsg("Monster moved");
+    //debugmsg("Monster moved");
   }
   fall_if_needed(map);
 }
@@ -143,7 +143,7 @@ void Monster::path_to_target(Map* map)
     return;
   }
   Point tar = targets[ rng(0, targets.size() - 1) ];
-  path = map->path(type, posx, posy, tar.x, tar.y);
+  path = map->path(id, posx, posy, tar.x, tar.y);
 }
 
 void Monster::path_to_random_target(Map* map)
@@ -167,5 +167,5 @@ void Monster::path_to_random_target(Map* map)
   if (maxy > 119) {
     maxy = 119;
   }
-  path = map->path(type, posx, posy, rng(minx, maxx), rng(miny, maxy));
+  path = map->path(id, posx, posy, rng(minx, maxx), rng(miny, maxy));
 }

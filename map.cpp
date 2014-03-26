@@ -316,7 +316,7 @@ void Map::move_monsters(Player &pl)
 // TODO: Display a message.
         pl.take_damage( mon->type->damage );
       } else if (pl.posy > 12 && dist <= mon->type->awareness) {
-        mon->path = path(mon->type, mon->posx, mon->posy, pl.posx, pl.posy);
+        mon->path = path(mon->id, mon->posx, mon->posy, pl.posx, pl.posy);
         if (mon->path.empty()) {  // Couldn't find a route to player
           //debugmsg("No path");
           mon->path_to_target(this);  // ... so path to something else.
@@ -343,15 +343,16 @@ enum A_star_status
 };
   
 
-std::vector<Point> Map::path(Monster_type* type,
+std::vector<Point> Map::path(Monster_id type,
                              int origx, int origy, int destx, int desty)
 {
   //debugmsg("Pathing [%d:%d] => [%d:%d]", origx, origy, destx, desty);
   bool tools = false, climb = false, fly = false;
-  if (type) {
-    tools = type->tools;
-    climb = type->climb;
-    fly   = type->fly;
+  if (type > M_null) {
+    Monster_type* mtype = &(MONSTERS[type]);
+    tools = mtype->tools;
+    climb = mtype->climb;
+    fly   = mtype->fly;
   }
 
   int min_x = (origx < destx ? origx - 3 : destx - 3);
@@ -490,22 +491,23 @@ std::vector<Point> Map::path(Monster_type* type,
   return real_ret;
 }
 
-int Map::pathing_cost(Monster_type* type, int curx, int cury, int x, int y)
+int Map::pathing_cost(Monster_id type, int curx, int cury, int x, int y)
 {
   int dig = 1, dig_delay = 1;
   bool tools = false, climb = false, fly = false;
-  if (type) {
-    dig = type->dig;
-    dig_delay = type->dig_delay;
-    tools = type->tools;
-    climb = type->climb;
-    fly   = type->fly;
+  if (type > M_null) {
+    Monster_type* mtype = &(MONSTERS[type]);
+    dig       = mtype->dig;
+    dig_delay = mtype->dig_delay;
+    tools     = mtype->tools;
+    climb     = mtype->climb;
+    fly       = mtype->fly;
   }
   Tile_datum* data = get_tile_data(x, y);
   Tile* tile = get_tile(x, y);
   int ret = 0;
   if (data->blocks) { // Start with time to dig
-    if (type->dig > 0) {
+    if (dig > 0) {
       ret = (tile->hp / dig) * dig_delay;
     } else {
       return 0; // Can't get through it!

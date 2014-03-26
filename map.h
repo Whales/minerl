@@ -46,9 +46,9 @@ public:
   void spawn_monsters (Player& pl);
   void move_monsters  (Player& pl);
 
-  std::vector<Point> path(Monster_type* type,
+  std::vector<Point> path(Monster_id type,
                           int origx, int origy, int destx, int desty);
-  int pathing_cost(Monster_type* type, int curx, int cury, int x, int y);
+  int pathing_cost(Monster_id type, int curx, int cury, int x, int y);
 
   std::vector<Monster> monsters;
 
