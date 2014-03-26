@@ -106,6 +106,16 @@ void Monster::move(Map* map, int movex, int movey)
 
 bool Monster::fall_if_needed(Map* map)
 {
+  if (type->fly) {
+    return false; // If we fly, we never fall!
+  }
+  if (type->climb) {
+    if (map->get_tile_data(posx - 1, posy)->blocks ||
+        map->get_tile_data(posx + 1, posy)->blocks ||
+        map->get_tile_data(posx,     posy)->climb_cost > 0) {
+      return false; // We're clinging to a wall / ladder!
+    }
+  }
   Tile_datum* below = map->get_tile_data(posx, posy + 1);
   if (below->blocks || below->climb_cost > 0) {
     return false;
