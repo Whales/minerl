@@ -93,7 +93,7 @@ void Monster::move(Map* map, int movex, int movey)
       posy = movey;
       //debugmsg("Monster moved");
     } else if (type->tools) {
-      map->set_tile(posx, posy, T_ladder);
+      map->add_ladder(posx, posy);
       //debugmsg("Monster put ladder");
     }
   } else {

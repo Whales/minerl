@@ -40,7 +40,11 @@ public:
   void draw(Window* w, Player* pl);
 
   void set_tile(int x, int y, Tile_id tile);
+  void add_ladder (int x, int y);
+  void add_support(int x, int y);
   void add_falling(int x, int y);
+
+  void add_msg(std::string message);
 
   void process_falling(Player& pl);
   void spawn_monsters (Player& pl);
@@ -54,6 +58,7 @@ public:
 
 private:
   std::vector< std::vector<Tile> > tiles;
+  std::vector< std::string > messages;
   std::vector<Point> falling;
   Tile null_tile;
 };

@@ -191,6 +191,8 @@ void Map::draw(Window* w, Player* pl)
 
   int x_min = pl->posx - xsize / 2;
   int y_min = pl->posy - ysize / 2;
+  int x_max = x_min + xsize - 1;
+  int y_max = y_min + ysize - 1;
 
   for (int x = 0; x < xsize; x++) {
     for (int y = 0; y < ysize; y++) {
@@ -199,22 +201,33 @@ void Map::draw(Window* w, Player* pl)
       if (x_ter == pl->posx && y_ter == pl->posy) {
         w->putglyph(x, y, glyph('@', c_white, c_black));
       } else {
-        bool found_monster = false;
-        for (int i = 0; i < monsters.size() && !found_monster; i++) {
-          if (monsters[i].posx == x_ter && monsters[i].posy == y_ter) {
-            found_monster = true;
-            w->putglyph(x, y, monsters[i].type->sym);
-          }
-        }
-        if (!found_monster) {
-          Tile* tile = get_tile(x_ter, y_ter);
-          if (tile->seen) {
-            w->putglyph(x, y, tile->sym);
-          } else {
-            w->putglyph(x, y, glyph('x', c_black, c_black));
-          }
+        Tile* tile = get_tile(x_ter, y_ter);
+        if (tile->seen) {
+          w->putglyph(x, y, tile->sym);
+        } else {
+          w->putglyph(x, y, glyph('x', c_black, c_black));
         }
       }
+    }
+  }
+// Now, draw monsters.
+  for (int i = 0; i < monsters.size(); i++) {
+    if (monsters[i].posx >= x_min && monsters[i].posx <= x_max &&
+        monsters[i].posy >= y_min && monsters[i].posy <= y_max   ) {
+      int x = monsters[i].posx - x_min, y = monsters[i].posy - y_min;
+      w->putglyph(x, y, monsters[i].type->sym);
+    }
+  }
+// Finally, draw the message, if any...
+  while (!messages.empty()) {
+    w->putstr(1, 0, c_yellow, c_black, messages[0]);
+    messages.erase(messages.begin());
+    if (!messages.empty()) {
+      w->putstr(1, 1, c_black, c_red, "More... (Press Spacebar)");
+    }
+    long ch;
+    while (ch != ' ') {
+      ch = input();
     }
   }
 }
@@ -223,6 +236,24 @@ void Map::set_tile(int x, int y, Tile_id tile)
 {
   Tile* tileptr = get_tile(x, y);
   tileptr->set_id(tile);
+}
+
+void Map::add_ladder(int x, int y)
+{
+  if (get_tile_id(x, y) == T_support) {
+    set_tile(x, y, T_ladder_and_support);
+  } else {
+    set_tile(x, y, T_ladder);
+  }
+}
+
+void Map::add_support(int x, int y)
+{
+  if (get_tile_id(x, y) == T_ladder) {
+    set_tile(x, y, T_ladder_and_support);
+  } else {
+    set_tile(x, y, T_support);
+  }
 }
 
 void Map::add_falling(int x, int y)
@@ -239,6 +270,11 @@ debugmsg("Already falling");
   }
   //debugmsg("Adding %d:%d", x, y);
   falling.push_back( Point(x, y) );
+}
+
+void Map::add_msg(std::string message)
+{
+  messages.push_back(message);
 }
 
 void Map::process_falling(Player& pl)

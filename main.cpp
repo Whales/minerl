@@ -54,22 +54,18 @@ int main()
       if (ch == 'w' && here != T_ladder) {
         if (player.supplies[S_ladders] > 0) {
           player.supplies[S_ladders]--;
-          if (here == T_support) {
-            map.set_tile(player.posx, player.posy, T_ladder_and_support);
-          } else {
-            map.set_tile(player.posx, player.posy, T_ladder);
-          }
+          map.add_ladder(player.posx, player.posy);
           player_took_turn = true;
+        } else {
+          map.add_msg("Out of ladders!");
         }
       } else if (ch == 's' && here != T_support) {
         if (player.supplies[S_supports] > 0) {
           player.supplies[S_supports]--;
-          if (here == T_ladder) {
-            map.set_tile(player.posx, player.posy, T_ladder_and_support);
-          } else {
-            map.set_tile(player.posx, player.posy, T_support);
-          }
+          map.add_support(player.posx, player.posy);
           player_took_turn = true;
+        } else {
+          map.add_msg("Out of supports!");
         }
       }
     }
