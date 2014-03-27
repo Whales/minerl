@@ -27,6 +27,7 @@ struct Monster_type
   int awareness;
   bool tools;
   bool climb;
+  bool cling;
   bool fly;
   glyph sym;
   std::vector<Tile_id> targets;
@@ -39,10 +40,11 @@ struct Monster_type
     damage = 1;
   }
 
-  Monster_type(int H, int D, int DD, int DAM, int A, bool T, bool C, bool F,
+  Monster_type(int H, int D, int DD, int DAM, int A,
+               bool T, bool C, bool G, bool F,
                char S, nc_color FG, ...) :
-    hp (H), dig (D), dig_delay (DD), damage (DAM), awareness (A), tools (T),
-    climb (C), fly (F)
+    hp (H), dig (D), dig_delay (DD), damage (DAM), awareness (A),
+    tools (T), climb (C), cling (G), fly (F)
   {
     sym = glyph(S, FG, c_black);
     va_list ap;

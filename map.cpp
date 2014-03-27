@@ -347,11 +347,12 @@ std::vector<Point> Map::path(Monster_id type,
                              int origx, int origy, int destx, int desty)
 {
   //debugmsg("Pathing [%d:%d] => [%d:%d]", origx, origy, destx, desty);
-  bool tools = false, climb = false, fly = false;
+  bool tools = false, climb = false, cling = false, fly = false;
   if (type > M_null) {
     Monster_type* mtype = &(MONSTERS[type]);
     tools = mtype->tools;
     climb = mtype->climb;
+    cling = mtype->cling;
     fly   = mtype->fly;
   }
 
@@ -435,8 +436,10 @@ std::vector<Point> Map::path(Monster_id type,
       Tile_datum* UL_data = get_tile_data(current.x - 1, current.y - 1);
       Tile_datum* UR_data = get_tile_data(current.x + 1, current.y - 1);
       bool go_up = (fly || tools);
-      if (!go_up && climb) {
-        if (UL_data->blocks || UR_data->blocks || U_data->climb_cost > 0) {
+      if (!go_up) {
+        if (climb && U_data->climb_cost > 0) {
+          go_up = true;
+        } else if (cling && (UL_data->blocks || UR_data->blocks)) {
           go_up = true;
         }
       }
@@ -499,13 +502,14 @@ std::vector<Point> Map::path(Monster_id type,
 int Map::pathing_cost(Monster_id type, int curx, int cury, int x, int y)
 {
   int dig = 1, dig_delay = 1;
-  bool tools = false, climb = false, fly = false;
+  bool tools = false, climb = false, cling = false, fly = false;
   if (type > M_null) {
     Monster_type* mtype = &(MONSTERS[type]);
     dig       = mtype->dig;
     dig_delay = mtype->dig_delay;
     tools     = mtype->tools;
     climb     = mtype->climb;
+    cling     = mtype->cling;
     fly       = mtype->fly;
   }
   Tile_datum* data = get_tile_data(x, y);
@@ -519,7 +523,7 @@ int Map::pathing_cost(Monster_id type, int curx, int cury, int x, int y)
     }
   }
   if (y < cury) { // Gotta move up
-    if (fly || climb) {
+    if (fly || climb || cling) {
 // Don't check climbability here; pathfinder does that!
       ret++;  // Just takes a turn to fly up
     } else if (tools) {

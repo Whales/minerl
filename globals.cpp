@@ -46,12 +46,16 @@ void init_data()
   COST[S_supports]  =   7;
   AMT [S_supports]  =   1;
 
-  MONSTERS[M_worm]        = Monster_type(8, 1, 2, 1, 3, false, false, false,
-                                         'w', c_ltred, 0);
-  MONSTERS[M_cockroach]   = Monster_type(3, 1, 5, 1, 6, false, true, false,
-                                         'c', c_brown, 0);
-  MONSTERS[M_termite]     = Monster_type(3, 1, 5, 1, 6, false, true, false,
-                                         'c', c_red,
-                              T_ladder, T_support, T_ladder_and_support, 0);
+  MONSTERS[M_worm]        =
+    Monster_type(8, 1, 2, 1, 3, false, false, true, false, 'w', c_ltred,
+                 0);
+
+  MONSTERS[M_cockroach]   =
+    Monster_type(3, 1, 5, 1, 6, false, true, true, false, 'c', c_brown,
+                 0);
+
+  MONSTERS[M_termite]     =
+    Monster_type(3, 1, 5, 1, 6, false, true, true, false, 'c', c_red,
+                 T_ladder, T_support, T_ladder_and_support, 0);
 
 }
