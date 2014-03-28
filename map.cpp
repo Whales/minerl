@@ -345,6 +345,7 @@ void Map::move_monsters(Player &pl)
 // If we're adjacent to the player, attack
     Monster* mon = &(monsters[i]);
     if (mon->rest > 0) {
+      debugmsg("Rest");
       mon->rest--;
     } else {
       int dist = rl_dist(mon->posx, mon->posy, pl.posx, pl.posy);
@@ -354,17 +355,13 @@ void Map::move_monsters(Player &pl)
       } else if (pl.posy > 12 && dist <= mon->type->awareness) {
         mon->path = path(mon->id, mon->posx, mon->posy, pl.posx, pl.posy);
         if (mon->path.empty()) {  // Couldn't find a route to player
-          //debugmsg("No path");
           mon->path_to_target(this);  // ... so path to something else.
         }
-        //debugmsg("path size %d", mon->path.size());
         mon->follow_path(this);
       } else if (!mon->path.empty()) {
-        //debugmsg("path size %d", mon->path.size());
         mon->follow_path(this);
       } else {  // Nowhere near player; find something to eat?
         mon->path_to_target(this);
-        //debugmsg("path size %d", mon->path.size());
         mon->follow_path(this);
       }
     }
