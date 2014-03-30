@@ -51,6 +51,9 @@ int main()
 
     if (player.posy > 12) { // Can only use items underground
       Tile_id here = map.get_tile_id(player.posx, player.posy);
+      if (ch == '!') {
+        map.spawn_monsters(player);
+      }
       if (ch == 'w' && here != T_ladder) {
         if (player.supplies[S_ladders] > 0) {
           player.supplies[S_ladders]--;

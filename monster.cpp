@@ -30,6 +30,7 @@ void Monster::set_type(Monster_id mid, Monster_type* mtype)
 void Monster::follow_path(Map* map)
 {
   if (path.empty()) {
+    debugmsg("No path");
     return;
   }
 
@@ -58,7 +59,7 @@ void Monster::follow_path(Map* map)
 void Monster::move(Map* map, int movex, int movey)
 {
   if (posx == movex && posy == movey) {
-    //debugmsg("Monster paused");
+    debugmsg("Monster paused");
     return;
   }
   if (!map) {
