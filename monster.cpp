@@ -30,13 +30,13 @@ void Monster::set_type(Monster_id mid, Monster_type* mtype)
 void Monster::follow_path(Map* map)
 {
   if (path.empty()) {
-    debugmsg("No path");
+    //debugmsg("No path");
     return;
   }
 
 // Make sure the next step in the path is adjacent to us.
   if (rl_dist(posx, posy, path[0].x, path[0].y) > 1) {
-    debugmsg("Bad path");
+    //debugmsg("Bad path");
     std::vector<Point> tmp = map->path(id, posx, posy, path[0].x, path[0].y);
     for (int i = tmp.size() - 1; i >= 0; i--) {
       path.insert( path.begin(), tmp[i] );
@@ -45,7 +45,7 @@ void Monster::follow_path(Map* map)
 
 // Make sure the next step in the path is adjacent to us... again.
   if (rl_dist(posx, posy, path[0].x, path[0].y) > 1) {
-    debugmsg("Monster really couldn't path!");
+    //debugmsg("Monster really couldn't path!");
     path.clear();
     return;
   }

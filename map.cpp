@@ -4,6 +4,7 @@
 #include "player.h"
 #include "geometry.h"
 #include <vector>
+#include <fstream>  // For Map::path() debug output
 
 Tile::Tile()
 {
@@ -345,7 +346,7 @@ void Map::move_monsters(Player &pl)
 // If we're adjacent to the player, attack
     Monster* mon = &(monsters[i]);
     if (mon->rest > 0) {
-      debugmsg("Rest");
+      //debugmsg("Rest");
       mon->rest--;
     } else {
       int dist = rl_dist(mon->posx, mon->posy, pl.posx, pl.posy);
@@ -379,6 +380,9 @@ enum A_star_status
 std::vector<Point> Map::path(Monster_id type,
                              int origx, int origy, int destx, int desty)
 {
+  if (origx == destx && origy == desty) {
+    return std::vector<Point>();  // No pathing to do!
+  }
   //debugmsg("Pathing [%d:%d] => [%d:%d]", origx, origy, destx, desty);
   bool tools = false, climb = false, cling = false, fly = false;
   if (type > M_null) {
@@ -486,6 +490,7 @@ std::vector<Point> Map::path(Monster_id type,
           case 3: ny--; break;
           case 4: ny++; break;
         }
+// Ensure we're inbounds
         if (nx >= 0 && ny >= 0 && nx < x_size && ny < y_size) {
           int cost = pathing_cost(type, current.x, current.y, nx, ny);
 // Only check the spot if we can go up, or if it's not an upwards move.
@@ -520,6 +525,15 @@ std::vector<Point> Map::path(Monster_id type,
   while (parent[cur.x][cur.y] != Point(origx, origy)) {
     cur = parent[cur.x][cur.y];
     if (cur.x < 0 || cur.y < 0 || cur.x >= x_size || cur.y >= y_size) {
+      std::ofstream fout;
+      fout.open("debug.txt", std::fstream::trunc);
+      for (int y = 0; y < y_size; y++) {
+        for (int x = 0; x < x_size; x++) {
+          fout << parent[x][y].str() << "   ";
+        }
+        fout << std::endl;
+      }
+      fout.close();
       debugmsg("Cur %s", cur.str().c_str());
     }
     ret.push_back( Point(cur.x + min_x, cur.y + min_y) );
