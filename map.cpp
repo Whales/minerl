@@ -468,12 +468,13 @@ std::vector<Point> Map::path(Monster_id type,
 // 4) Examine all adjacent points
 //  4a) We can go up if we fly, we use tools, or we climb & there's something to
 //      climb on.
-      Tile_datum* U_data  = get_tile_data(current.x    , current.y - 1);
+      Tile_datum* here    = get_tile_data(current.x    , current.y    );
+      //Tile_datum* U_data  = get_tile_data(current.x    , current.y - 1);
       Tile_datum* UL_data = get_tile_data(current.x - 1, current.y - 1);
       Tile_datum* UR_data = get_tile_data(current.x + 1, current.y - 1);
       bool go_up = (fly || tools);
       if (!go_up) {
-        if (climb && U_data->climb_cost > 0) {
+        if (climb && here->climb_cost > 0) {
           go_up = true;
         } else if (cling && (UL_data->blocks || UR_data->blocks)) {
           go_up = true;
@@ -488,7 +489,7 @@ std::vector<Point> Map::path(Monster_id type,
           case 3: ny--; break;
           case 4: ny++; break;
         }
-        if (nx < 0 && ny < 0 && nx < x_size && ny < y_size) {
+        if (nx >= 0 && ny >= 0 && nx < x_size && ny < y_size) {
           int cost = pathing_cost(type, current.x, current.y, nx, ny);
 // Only check the spot if we can go up, or if it's not an upwards move.
           if (cost > 0 && (ny >= current.y || go_up)) {
