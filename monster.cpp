@@ -67,8 +67,24 @@ void Monster::move(Map* map, int movex, int movey)
     return;
   }
 
+  Tile_id     tile_here = map->get_tile_id(posx, posy);
   Tile_datum* data      = map->get_tile_data(movex, movey);
   Tile_datum* data_here = map->get_tile_data(posx, posy);
+// If we "eat" what's here, then eat it and end our turn
+  if (!type) {
+    type = &(MONSTERS[id]);
+  }
+  bool ate_tile = false;
+  for (int i = 0; !ate_tile && i < type->targets.size(); i++) {
+    if (type->targets[i] == tile_here) {
+      map->set_tile(posx, posy, T_empty);
+      ate_tile = true;
+    }
+  }
+  if (ate_tile) {
+    return;
+  }
+
 // Can't move there; maybe dig?
   if (data->blocks) {
     if (data->dig > 0) {
