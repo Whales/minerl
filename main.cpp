@@ -150,10 +150,11 @@ void shop_upgrades(Player &pl)
       }
     } else if (ch == 'h' || ch == 'H') {
       int needed_healing = pl.equipment[E_stamina].level - pl.max_stamina;
-      int heal_cost = 5 * needed_healing;
+      int heal_cost = needed_healing;
       if (pl.cash >= heal_cost) {
         pl.cash -= heal_cost;
         pl.max_stamina = pl.equipment[E_stamina].level;
+        update_upgrade_ui(i_shop, pl);
       }
     } else if (ch == 'q' || ch == 'Q') {
       return;

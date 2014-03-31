@@ -89,6 +89,11 @@ int Player::get_lamp_radius()
   return equipment[E_lamp].level;
 }
 
+int Player::get_damage()
+{
+  return equipment[E_sword].level;
+}
+
 void Player::reset_values()
 {
   equipment[E_stamina].reset();
@@ -105,6 +110,19 @@ bool Player::move(Map* map, int movex, int movey)
   if (!map) {
     return false;
   }
+// Check if we hit a monster
+  bool found_monster = false;
+  for (int i = 0; !found_monster && i < map->monsters.size(); i++) {
+    Monster* mon = &(map->monsters[i]);
+    if (movex == mon->posx && movey == mon->posy) {
+      mon->take_damage( get_damage() );
+      found_monster = true;
+    }
+  }
+  if (found_monster) {
+    return true;
+  }
+      
   Tile_datum* data      = map->get_tile_data(movex, movey);
   Tile_datum* data_here = map->get_tile_data(posx, posy);
 // Can't move there; maybe dig?

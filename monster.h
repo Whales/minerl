@@ -65,6 +65,7 @@ struct Monster
   Monster_id id;
   Monster_type* type;
   int hp;
+  bool dead;
   int rest;
   int posx;
   int posy;
@@ -76,6 +77,7 @@ struct Monster
 // Returns true if we fell
   bool fall_if_needed(Map* map);
   void path_to_target(Map* map);
+  void take_damage(int dam);
 
   void set_type(Monster_id mid, Monster_type* mtype = NULL);
 private:

@@ -345,27 +345,32 @@ void Map::move_monsters(Player &pl)
   for (int i = 0; i < monsters.size(); i++) {
 // If we're adjacent to the player, attack
     Monster* mon = &(monsters[i]);
-    if (mon->rest > 0) {
-      //debugmsg("Rest");
-      mon->rest--;
+    if (mon->dead || mon->hp <= 0) {
+      monsters.erase( monsters.begin() + i );
+      i--;
     } else {
-      int dist = rl_dist(mon->posx, mon->posy, pl.posx, pl.posy);
-      if (pl.posy > 12 && dist <= 1) {
-// TODO: Display a message.
-        pl.take_damage( mon->type->damage );
-      } else if (pl.posy > 12 && dist <= mon->type->awareness) {
-        mon->path = path(mon->id, mon->posx, mon->posy, pl.posx, pl.posy);
-        if (mon->path.empty()) {  // Couldn't find a route to player
-          mon->path_to_target(this);  // ... so path to something else.
+      if (mon->rest > 0) {
+        //debugmsg("Rest");
+        mon->rest--;
+      } else {
+        int dist = rl_dist(mon->posx, mon->posy, pl.posx, pl.posy);
+        if (pl.posy > 12 && dist <= 1) {
+  // TODO: Display a message.
+          pl.take_damage( mon->type->damage );
+        } else if (pl.posy > 12 && dist <= mon->type->awareness) {
+          mon->path = path(mon->id, mon->posx, mon->posy, pl.posx, pl.posy);
+          if (mon->path.empty()) {  // Couldn't find a route to player
+            mon->path_to_target(this);  // ... so path to something else.
+          }
+          mon->follow_path(this);
+        } else if (!mon->path.empty()) {
+          mon->follow_path(this);
+        } else {  // Nowhere near player; find something to eat?
+          mon->path_to_target(this);
+          mon->follow_path(this);
         }
-        mon->follow_path(this);
-      } else if (!mon->path.empty()) {
-        mon->follow_path(this);
-      } else {  // Nowhere near player; find something to eat?
-        mon->path_to_target(this);
-        mon->follow_path(this);
       }
-    }
+    } // if (!dead)
   }
 }
 

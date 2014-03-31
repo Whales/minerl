@@ -77,6 +77,7 @@ public:
   int get_storage();
   int get_dig_power();
   int get_lamp_radius();
+  int get_damage();
 
   void reset_values();
 // Returns true if we actually used our turn

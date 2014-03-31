@@ -14,6 +14,7 @@ Monster::Monster()
   posy = 0;
   type = NULL;
   id = M_null;
+  dead = false;
 }
 
 void Monster::set_type(Monster_id mid, Monster_type* mtype)
@@ -170,6 +171,14 @@ void Monster::path_to_target(Map* map)
   }
   Point tar = targets[ rng(0, targets.size() - 1) ];
   path = map->path(id, posx, posy, tar.x, tar.y);
+}
+
+void Monster::take_damage(int dam)
+{
+  hp -= dam;
+  if (hp <= 0) {
+    dead = true;
+  }
 }
 
 void Monster::path_to_random_target(Map* map)
