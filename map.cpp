@@ -122,7 +122,21 @@ void Map::generate()
   for (int i = 0; i < coal_veins; i++) {
     int x = rng(10, 110);
     int y = rng(13, 25);
-    add_vein(T_coal, x, y, rng(4, 8));
+    add_vein(T_coal, x, y, rng(6, 12));
+  }
+
+  int iron_veins = 5 * rng(10, 15);
+  for (int i = 0; i < iron_veins; i++) {
+    int x = rng(10, 110);
+    int y = rng(20, 40);
+    add_vein(T_iron, x, y, rng(4, 8));
+  }
+
+  int copper_veins = 5 * rng(10, 15);
+  for (int i = 0; i < copper_veins; i++) {
+    int x = rng(10, 110);
+    int y = rng(30, 60);
+    add_vein(T_copper, x, y, rng(4, 8));
   }
 
   int empty_veins = 5 * rng(20, 30);
@@ -357,21 +371,34 @@ void Map::move_monsters(Player &pl)
         if (pl.posy > 12 && dist <= 1) {
   // TODO: Display a message.
           pl.take_damage( mon->type->damage );
+
         } else if (pl.posy > 12 && dist <= mon->type->awareness) {
           mon->path = path(mon->id, mon->posx, mon->posy, pl.posx, pl.posy);
           if (mon->path.empty()) {  // Couldn't find a route to player
             mon->path_to_target(this);  // ... so path to something else.
           }
-          mon->follow_path(this);
+          mon->follow_path(this, &pl);
+
         } else if (!mon->path.empty()) {
-          mon->follow_path(this);
+          mon->follow_path(this, &pl);
+
         } else {  // Nowhere near player; find something to eat?
           mon->path_to_target(this);
-          mon->follow_path(this);
+          mon->follow_path(this, &pl);
         }
       }
     } // if (!dead)
   }
+}
+
+Monster* Map::monster_at(int x, int y)
+{
+  for (int i = 0; i < monsters.size(); i++) {
+    if (monsters[i].posx == x && monsters[i].posy == y) {
+      return &(monsters[i]);
+    }
+  }
+  return NULL;
 }
 
 enum A_star_status

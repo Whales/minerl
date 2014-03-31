@@ -17,7 +17,7 @@ void init_data()
                                  "_", "grass");
   TILES[T_shop]     = Tile_datum(c_black,   c_blue,   false, false, 0, 0, 0,
                                  "=", "shop");
-  TILES[T_dirt]     = Tile_datum(c_ltgray,  c_brown,  true,  false, 5, 0, 0,
+  TILES[T_dirt]     = Tile_datum(c_ltgray,  c_brown,  true,  false, 3, 0, 0,
                                  "   `~,.'^", "dirt");
   TILES[T_boulder]  = Tile_datum(c_ltgray,  c_black,  true,  false, 0, 0, 0,
                                  "0", "boulder");
@@ -31,8 +31,12 @@ void init_data()
   TILES[T_entrance] = Tile_datum(c_black,   c_cyan,   false, false, 0, 0, 0,
                                  "M", "entrance");
 
-  TILES[T_coal]     = Tile_datum(c_black,   c_brown,  true,  true,  8, 0, 5,
+  TILES[T_coal]     = Tile_datum(c_black,   c_brown,  true,  true,  5, 0,  5,
                                  "#", "coal");
+  TILES[T_iron]     = Tile_datum(c_red,     c_brown,  true,  true,  8, 0, 10,
+                                 "#", "iron");
+  TILES[T_copper]   = Tile_datum(c_ltred,   c_brown,  true,  true, 10, 0, 14,
+                                 "#", "copper");
 
   COST[S_auger]     = 500;
   AMT [S_auger]     =   1;

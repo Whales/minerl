@@ -199,6 +199,9 @@ bool Player::fall_if_needed(Map* map)
   if (below->blocks || below->climb_cost > 0) {
     return false;
   }
+  if (map->monster_at(posx, posy + 1)) {
+    return false;
+  }
 // TODO: Falling damage
   move(map, posx, posy + 1);
   fall_if_needed(map);

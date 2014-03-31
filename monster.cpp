@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "rng.h"
 #include "window.h"
+#include "player.h"
 #include <vector>
 
 Monster::Monster()
@@ -28,7 +29,7 @@ void Monster::set_type(Monster_id mid, Monster_type* mtype)
   hp = type->hp;
 }
 
-void Monster::follow_path(Map* map)
+void Monster::follow_path(Map* map, Player *pl)
 {
   if (path.empty()) {
     //debugmsg("No path");
@@ -51,13 +52,14 @@ void Monster::follow_path(Map* map)
     return;
   }
 
-  move(map, path[0].x, path[0].y);
+  move(map, pl, path[0].x, path[0].y);
   if (posx == path[0].x && posy == path[0].y) {
     path.erase( path.begin() );
   }
+
 }
 
-void Monster::move(Map* map, int movex, int movey)
+void Monster::move(Map* map, Player *pl, int movex, int movey)
 {
   if (posx == movex && posy == movey) {
     debugmsg("Monster paused");
@@ -65,6 +67,11 @@ void Monster::move(Map* map, int movex, int movey)
   }
   if (!map) {
     debugmsg("Monster::move(NULL,...");
+    return;
+  }
+
+  if (pl && pl->posx == movex && pl->posy == movey) {
+    pl->take_damage( type->damage );
     return;
   }
 
@@ -99,7 +106,7 @@ void Monster::move(Map* map, int movex, int movey)
         }
       }
       //debugmsg("Monster dig");
-      fall_if_needed(map);
+      fall_if_needed(map, pl);
       rest = type->dig_delay - 1; // Some monsters take several turns to dig
       return;
     }
@@ -119,10 +126,10 @@ void Monster::move(Map* map, int movex, int movey)
     posy = movey;
     //debugmsg("Monster moved");
   }
-  fall_if_needed(map);
+  fall_if_needed(map, pl);
 }
 
-bool Monster::fall_if_needed(Map* map)
+bool Monster::fall_if_needed(Map* map, Player *pl)
 {
   if (type->fly) {
     return false; // If we fly, we never fall!
@@ -133,13 +140,19 @@ bool Monster::fall_if_needed(Map* map)
                              map->get_tile_data(posx + 1, posy)->blocks   )) {
     return false; // We're climbing a ladder!
   }
+  if (map->monster_at(posx, posy + 1)) {
+    return false;
+  }
+  if (pl && pl->posx == posx && pl->posy == posy + 1) {
+    return false;
+  }
   Tile_datum* below = map->get_tile_data(posx, posy + 1);
   if (below->blocks || below->climb_cost > 0) {
     return false;
   }
 // TODO: Falling damage
-  move(map, posx, posy + 1);
-  fall_if_needed(map);
+  move(map, pl, posx, posy + 1);
+  fall_if_needed(map, pl);
   return true;
 }
 

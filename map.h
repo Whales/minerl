@@ -49,6 +49,7 @@ public:
   void process_falling(Player& pl);
   void spawn_monsters (Player& pl);
   void move_monsters  (Player& pl);
+  Monster* monster_at(int x, int y);
 
   std::vector<Point> path(Monster_id type,
                           int origx, int origy, int destx, int desty);

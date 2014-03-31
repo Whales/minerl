@@ -150,7 +150,7 @@ void shop_upgrades(Player &pl)
       }
     } else if (ch == 'h' || ch == 'H') {
       int needed_healing = pl.equipment[E_stamina].level - pl.max_stamina;
-      int heal_cost = needed_healing;
+      int heal_cost = 2 * needed_healing;
       if (pl.cash >= heal_cost) {
         pl.cash -= heal_cost;
         pl.max_stamina = pl.equipment[E_stamina].level;
@@ -204,7 +204,7 @@ void update_upgrade_ui(cuss::interface &i_shop, Player &pl)
 
   i_shop.set_data("num_max_stamina",   pl.max_stamina);
   int needed_healing = pl.equipment[E_stamina].level - pl.max_stamina;
-  int heal_cost = 5 * needed_healing;
+  int heal_cost = 2 * needed_healing;
   i_shop.set_data("num_healed_stamina",pl.equipment[E_stamina].level );
   i_shop.set_data("num_cost_healing",  heal_cost);
   if (heal_cost > pl.cash) {

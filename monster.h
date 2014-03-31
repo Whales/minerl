@@ -8,6 +8,7 @@
 #include <cstdarg>  // For variadic constructor
 
 class Map;
+class Player;
 
 enum Monster_id
 {
@@ -72,10 +73,10 @@ struct Monster
 
   std::vector<Point> path;
 
-  void follow_path(Map* map);
-  void move(Map* map, int movex, int movey);
+  void follow_path(Map* map, Player *pl);
+  void move(Map* map, Player *pl, int movex, int movey);
 // Returns true if we fell
-  bool fall_if_needed(Map* map);
+  bool fall_if_needed(Map* map, Player *pl);
   void path_to_target(Map* map);
   void take_damage(int dam);
 
