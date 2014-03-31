@@ -118,25 +118,25 @@ void Map::generate()
   tiles[65][12].set_id(T_shop);
 
 // Now place some veins.
-  int coal_veins = 5 * rng(10, 15);
+  int coal_veins = 5 * rng( 8, 12);
   for (int i = 0; i < coal_veins; i++) {
     int x = rng(10, 110);
     int y = rng(13, 25);
-    add_vein(T_coal, x, y, rng(6, 12));
+    add_vein(T_coal, x, y, rng(5, 10));
   }
 
-  int iron_veins = 5 * rng(10, 15);
+  int iron_veins = 5 * rng( 8, 12);
   for (int i = 0; i < iron_veins; i++) {
     int x = rng(10, 110);
     int y = rng(20, 40);
     add_vein(T_iron, x, y, rng(4, 8));
   }
 
-  int copper_veins = 5 * rng(10, 15);
+  int copper_veins = 5 * rng( 7, 11);
   for (int i = 0; i < copper_veins; i++) {
     int x = rng(10, 110);
     int y = rng(30, 60);
-    add_vein(T_copper, x, y, rng(4, 8));
+    add_vein(T_copper, x, y, rng(4, 7));
   }
 
   int empty_veins = 5 * rng(20, 30);
